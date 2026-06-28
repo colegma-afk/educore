@@ -1962,44 +1962,180 @@ function DashboardAdmin(){return(<div><h2 style={{fontSize:18,fontWeight:500,mar
 function DashboardProfesor(){const mc=CURSOS.filter(c=>c.profesor==="Luis Pérez");return(<div><h2 style={{fontSize:18,fontWeight:500,marginBottom:"1rem"}}>Mi Panel Docente</h2><div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:12,marginBottom:"1.5rem"}}><KPI label="Mis cursos" value={mc.length} color="#378ADD" icon="📚"/><KPI label="Total alumnos" value={mc.reduce((a,c)=>a+c.alumnos,0)} color="#1D9E75" icon="👥"/><KPI label="Recursos" value="180" color="#7F77DD" icon="📁"/></div><div style={{background:"var(--color-background-primary)",border:"0.5px solid var(--color-border-tertiary)",borderRadius:10,padding:"1rem"}}>{mc.map(c=>(<div key={c.id} style={{background:"var(--color-background-secondary)",borderRadius:8,padding:"0.75rem",marginBottom:8}}><div style={{display:"flex",justifyContent:"space-between"}}><div style={{fontWeight:500,fontSize:14}}>{c.nombre}</div><Badge text={`${c.alumnos} alumnos`} color={c.color} bg={c.color+"22"}/></div><div style={{fontSize:12,color:"var(--color-text-secondary)",marginTop:4}}>{c.modulos} módulos · {c.categoria}</div><div style={{marginTop:8,background:"var(--color-background-primary)",borderRadius:4,height:5}}><div style={{width:`${c.progreso}%`,background:c.color,borderRadius:4,height:5}}/></div></div>))}</div></div>);}
 function DashboardAlumno(){return(<div><h2 style={{fontSize:18,fontWeight:500,marginBottom:"1rem"}}>Bienvenida, María</h2><div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:12,marginBottom:"1.5rem"}}><KPI label="Cursos" value="3" color="#BA7517" icon="📚"/><KPI label="Progreso" value="51%" color="#1D9E75" icon="📈"/><KPI label="Certificados" value="1" color="#7F77DD" icon="🏅"/></div><div style={{background:"var(--color-background-primary)",border:"0.5px solid var(--color-border-tertiary)",borderRadius:10,padding:"1rem"}}>{CURSOS.slice(0,3).map(c=>(<div key={c.id} style={{display:"flex",gap:12,alignItems:"center",padding:"8px 0",borderBottom:"0.5px solid var(--color-border-tertiary)"}}><div style={{width:36,height:36,borderRadius:8,background:c.color+"22",display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,flexShrink:0}}>📚</div><div style={{flex:1}}><div style={{fontSize:13,fontWeight:500}}>{c.nombre}</div><div style={{marginTop:4,background:"var(--color-background-secondary)",borderRadius:4,height:4}}><div style={{width:`${c.progreso}%`,background:c.color,borderRadius:4,height:4}}/></div></div><span style={{fontSize:12,color:"var(--color-text-secondary)"}}>{c.progreso}%</span></div>))}</div></div>);}
 
-function UsuariosPage(){
-  const [f,setF]=useState("");const [rf,setRf]=useState("todos");
-  const fil=USERS.filter(u=>(rf==="todos"||u.rol===rf)&&u.nombre.toLowerCase().includes(f.toLowerCase()));
-  return(<div><div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"1rem"}}><h2 style={{fontSize:18,fontWeight:500}}>Gestión de usuarios</h2><button style={{padding:"0.4rem 1rem",background:"#7F77DD",color:"#fff",border:"none",borderRadius:6,fontSize:13,cursor:"pointer"}}>+ Nuevo usuario</button></div><div style={{display:"flex",gap:8,marginBottom:12}}><input placeholder="Buscar..." value={f} onChange={e=>setF(e.target.value)} style={{flex:1,padding:"0.4rem 0.75rem",border:"0.5px solid var(--color-border-secondary)",borderRadius:6,fontSize:13,background:"var(--color-background-primary)",color:"var(--color-text-primary)"}}/><select value={rf} onChange={e=>setRf(e.target.value)} style={{padding:"0.4rem 0.75rem",border:"0.5px solid var(--color-border-secondary)",borderRadius:6,fontSize:13,background:"var(--color-background-primary)",color:"var(--color-text-primary)"}}><option value="todos">Todos</option>{Object.keys(ROLES).map(r=><option key={r} value={r}>{ROLES[r].label}</option>)}</select></div><div style={{background:"var(--color-background-primary)",border:"0.5px solid var(--color-border-tertiary)",borderRadius:10,overflow:"hidden"}}><table style={{width:"100%",borderCollapse:"collapse",fontSize:13}}><thead><tr style={{background:"var(--color-background-secondary)"}}>{["Usuario","Rol","Curso","Estado","Registro"].map(h=><th key={h} style={{padding:"0.6rem 1rem",textAlign:"left",fontWeight:500,fontSize:12,color:"var(--color-text-secondary)",borderBottom:"0.5px solid var(--color-border-tertiary)"}}>{h}</th>)}</tr></thead><tbody>{fil.map(u=>(<tr key={u.id} style={{borderBottom:"0.5px solid var(--color-border-tertiary)"}}><td style={{padding:"0.6rem 1rem"}}><div style={{display:"flex",alignItems:"center",gap:8}}><Avatar name={u.nombre} color={rolColor[u.rol]} size={28}/><span style={{fontWeight:500}}>{u.nombre}</span></div></td><td style={{padding:"0.6rem 1rem"}}><Badge text={ROLES[u.rol].label} color={rolColor[u.rol]} bg={rolColor[u.rol]+"22"}/></td><td style={{padding:"0.6rem 1rem",color:"var(--color-text-secondary)",fontSize:12}}>{u.curso}</td><td style={{padding:"0.6rem 1rem"}}><Badge text={u.estado} color={estadoColor[u.estado]} bg={estadoColor[u.estado]+"22"}/></td><td style={{padding:"0.6rem 1rem",color:"var(--color-text-secondary)",fontSize:12}}>{u.fecha}</td></tr>))}</tbody></table></div></div>);
+// ── GESTIÓN DE USUARIOS Y ACCESO (demo, persistencia en localStorage) ──────
+function generarClave(n=8){
+  const chars="ABCDEFGHJKMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789";
+  let s="";for(let i=0;i<n;i++)s+=chars[Math.floor(Math.random()*chars.length)];
+  return s;
+}
+function emailDe(nombre,rol){
+  const base=(nombre||"usuario").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").trim().replace(/\s+/g,".");
+  return base+"@"+(rol==="alumno"?"gmail.com":"instituto.com");
+}
+const SEED_USERS=USERS.map(u=>({
+  ...u,
+  email: u.rol==="superadmin"?"superadmin@instituto.com":emailDe(u.nombre,u.rol),
+  clave: u.rol==="superadmin"?"educore2026":generarClave(),
+}));
+function cargarUsuarios(){
+  try{const raw=localStorage.getItem("educore_users");if(raw)return JSON.parse(raw);}catch(e){}
+  return SEED_USERS;
+}
+function guardarUsuarios(us){
+  try{localStorage.setItem("educore_users",JSON.stringify(us));}catch(e){}
+}
+
+const uInp={padding:"0.4rem 0.75rem",border:"0.5px solid var(--color-border-secondary)",borderRadius:6,fontSize:13,background:"var(--color-background-primary)",color:"var(--color-text-primary)"};
+const uTh={padding:"0.6rem 1rem",textAlign:"left",fontWeight:500,fontSize:12,color:"var(--color-text-secondary)",borderBottom:"0.5px solid var(--color-border-tertiary)"};
+const uTd={padding:"0.6rem 1rem"};
+const uAcc=(c)=>({padding:"3px 8px",background:c+"22",color:c,border:"0.5px solid "+c+"44",borderRadius:5,fontSize:13,cursor:"pointer"});
+
+function UsuariosPage({users,setUsers,role}){
+  const [f,setF]=useState("");
+  const [rf,setRf]=useState("todos");
+  const [creando,setCreando]=useState(false);
+  const [nuevo,setNuevo]=useState({nombre:"",email:"",rol:"alumno",curso:"—",estado:"activo"});
+  const [aviso,setAviso]=useState(null);
+  const [verClaves,setVerClaves]=useState(false);
+  const esAdmin=role==="superadmin";
+  const fil=users.filter(u=>(rf==="todos"||u.rol===rf)&&(u.nombre.toLowerCase().includes(f.toLowerCase())||(u.email||"").toLowerCase().includes(f.toLowerCase())));
+
+  const crear=()=>{
+    const nombre=nuevo.nombre.trim();
+    const email=(nuevo.email.trim()||emailDe(nombre,nuevo.rol)).toLowerCase();
+    if(!nombre){setAviso({error:"El nombre es obligatorio."});return;}
+    if(users.some(u=>(u.email||"").toLowerCase()===email)){setAviso({error:"Ya existe un usuario con ese email."});return;}
+    const clave=generarClave();
+    const u={id:Date.now(),nombre,email,rol:nuevo.rol,estado:nuevo.estado,curso:nuevo.curso||"—",fecha:new Date().toISOString().slice(0,10),clave};
+    setUsers([...users,u]);
+    setAviso({nombre,email,clave,titulo:"Usuario creado"});
+    setCreando(false);
+    setNuevo({nombre:"",email:"",rol:"alumno",curso:"—",estado:"activo"});
+  };
+  const eliminar=(u)=>{
+    if(u.rol==="superadmin"&&users.filter(x=>x.rol==="superadmin").length<=1){setAviso({error:"No puedes eliminar al único superadmin."});return;}
+    if(window.confirm("¿Eliminar a "+u.nombre+"? Esta acción no se puede deshacer."))setUsers(users.filter(x=>x.id!==u.id));
+  };
+  const regenerar=(u)=>{
+    const clave=generarClave();
+    setUsers(users.map(x=>x.id===u.id?{...x,clave}:x));
+    setAviso({nombre:u.nombre,email:u.email,clave,titulo:"Nueva clave generada"});
+  };
+
+  return(
+    <div>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"1rem"}}>
+        <h2 style={{fontSize:18,fontWeight:500}}>Gestión de usuarios</h2>
+        {esAdmin&&<button onClick={()=>{setCreando(!creando);setAviso(null);}} style={{padding:"0.4rem 1rem",background:creando?"var(--color-background-secondary)":"#7F77DD",color:creando?"var(--color-text-secondary)":"#fff",border:creando?"0.5px solid var(--color-border-secondary)":"none",borderRadius:6,fontSize:13,cursor:"pointer"}}>{creando?"Cancelar":"+ Nuevo usuario"}</button>}
+      </div>
+
+      {aviso&&(
+        <div style={{marginBottom:12,padding:"0.85rem 1rem",borderRadius:8,fontSize:13,background:aviso.error?"#FEE2E2":"#E1F5EE",color:aviso.error?"#A32D2D":"#0F6E56",border:"0.5px solid "+(aviso.error?"#E24B4A44":"#1D9E7544")}}>
+          {aviso.error?aviso.error:(
+            <div>
+              <div style={{fontWeight:600,marginBottom:4}}>✅ {aviso.titulo}</div>
+              <div>Usuario: <b>{aviso.nombre}</b></div>
+              <div>Email: <code>{aviso.email}</code></div>
+              <div>Clave de acceso: <code style={{fontSize:14,fontWeight:600}}>{aviso.clave}</code></div>
+              <div style={{marginTop:4,fontSize:11,opacity:0.85}}>Comparte esta clave con el usuario. Si se pierde, genera una nueva con 🔑.</div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {esAdmin&&creando&&(
+        <div style={{marginBottom:12,padding:"1rem",borderRadius:10,background:"var(--color-background-primary)",border:"0.5px solid var(--color-border-tertiary)"}}>
+          <div style={{fontSize:13,fontWeight:500,marginBottom:10}}>Nuevo usuario</div>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:10}}>
+            <input placeholder="Nombre completo" value={nuevo.nombre} onChange={e=>setNuevo({...nuevo,nombre:e.target.value})} style={uInp}/>
+            <input placeholder="Email (opcional, se autogenera)" value={nuevo.email} onChange={e=>setNuevo({...nuevo,email:e.target.value})} style={uInp}/>
+            <select value={nuevo.rol} onChange={e=>setNuevo({...nuevo,rol:e.target.value})} style={uInp}>{Object.keys(ROLES).map(r=><option key={r} value={r}>{ROLES[r].label}</option>)}</select>
+            <input placeholder="Curso (opcional)" value={nuevo.curso} onChange={e=>setNuevo({...nuevo,curso:e.target.value})} style={uInp}/>
+          </div>
+          <button onClick={crear} style={{padding:"0.45rem 1.2rem",background:"#1D9E75",color:"#fff",border:"none",borderRadius:6,fontSize:13,fontWeight:500,cursor:"pointer"}}>Crear y generar clave</button>
+        </div>
+      )}
+
+      <div style={{display:"flex",gap:8,marginBottom:12,alignItems:"center"}}>
+        <input placeholder="Buscar por nombre o email..." value={f} onChange={e=>setF(e.target.value)} style={{flex:1,...uInp}}/>
+        <select value={rf} onChange={e=>setRf(e.target.value)} style={uInp}><option value="todos">Todos los roles</option>{Object.keys(ROLES).map(r=><option key={r} value={r}>{ROLES[r].label}</option>)}</select>
+        {esAdmin&&<button onClick={()=>setVerClaves(!verClaves)} style={{padding:"0.4rem 0.75rem",background:"var(--color-background-secondary)",border:"0.5px solid var(--color-border-secondary)",borderRadius:6,fontSize:12,cursor:"pointer",color:"var(--color-text-secondary)",whiteSpace:"nowrap"}}>{verClaves?"🙈 Ocultar":"👁 Ver claves"}</button>}
+      </div>
+
+      <div style={{background:"var(--color-background-primary)",border:"0.5px solid var(--color-border-tertiary)",borderRadius:10,overflow:"hidden"}}>
+        <table style={{width:"100%",borderCollapse:"collapse",fontSize:13}}>
+          <thead><tr style={{background:"var(--color-background-secondary)"}}>{["Usuario","Rol","Curso","Estado",...(esAdmin?["Clave","Acciones"]:["Registro"])].map(h=><th key={h} style={uTh}>{h}</th>)}</tr></thead>
+          <tbody>
+            {fil.map(u=>(
+              <tr key={u.id} style={{borderBottom:"0.5px solid var(--color-border-tertiary)"}}>
+                <td style={uTd}><div style={{display:"flex",alignItems:"center",gap:8}}><Avatar name={u.nombre} color={rolColor[u.rol]} size={28}/><div><div style={{fontWeight:500}}>{u.nombre}</div><div style={{fontSize:11,color:"var(--color-text-secondary)"}}>{u.email}</div></div></div></td>
+                <td style={uTd}><Badge text={ROLES[u.rol].label} color={rolColor[u.rol]} bg={rolColor[u.rol]+"22"}/></td>
+                <td style={{...uTd,color:"var(--color-text-secondary)",fontSize:12}}>{u.curso}</td>
+                <td style={uTd}><Badge text={u.estado} color={estadoColor[u.estado]} bg={estadoColor[u.estado]+"22"}/></td>
+                {esAdmin?(
+                  <>
+                    <td style={{...uTd,fontSize:12}}><code>{verClaves?u.clave:"••••••"}</code></td>
+                    <td style={uTd}><div style={{display:"flex",gap:6}}><button onClick={()=>regenerar(u)} title="Generar nueva clave" style={uAcc("#378ADD")}>🔑</button><button onClick={()=>eliminar(u)} title="Eliminar usuario" style={uAcc("#E24B4A")}>🗑</button></div></td>
+                  </>
+                ):(
+                  <td style={{...uTd,color:"var(--color-text-secondary)",fontSize:12}}>{u.fecha}</td>
+                )}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
 }
 
 function GenericPage({title}){return(<div><h2 style={{fontSize:18,fontWeight:500,marginBottom:"1rem"}}>{title}</h2><div style={{background:"var(--color-background-secondary)",borderRadius:10,padding:"2rem",textAlign:"center",color:"var(--color-text-secondary)",fontSize:13}}>Sección en construcción.</div></div>);}
 
-function LoginScreen({onLogin}){
-  const [s,setS]=useState(null);
+const lgLbl={display:"block",fontSize:12,fontWeight:500,color:"var(--color-text-secondary)",marginBottom:4};
+const lgInp={width:"100%",padding:"0.55rem 0.75rem",border:"0.5px solid var(--color-border-secondary)",borderRadius:8,fontSize:14,background:"var(--color-background-secondary)",color:"var(--color-text-primary)",marginBottom:12};
+
+function LoginScreen({users,onLogin}){
+  const [email,setEmail]=useState("");
+  const [clave,setClave]=useState("");
+  const [err,setErr]=useState("");
+  const entrar=()=>{
+    const u=users.find(x=>(x.email||"").toLowerCase()===email.trim().toLowerCase()&&x.clave===clave);
+    if(!u){setErr("Email o clave incorrectos.");return;}
+    if(u.estado==="suspendido"){setErr("Tu cuenta está suspendida. Contacta al administrador.");return;}
+    if(u.estado==="pendiente"){setErr("Tu cuenta está pendiente de activación.");return;}
+    setErr("");onLogin(u);
+  };
   return(
     <div style={{minHeight:"100vh",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",background:"var(--color-background-tertiary)",padding:"2rem"}}>
       <div style={{fontSize:28,fontWeight:500,color:"#7F77DD",marginBottom:4}}>EduCore</div>
       <div style={{fontSize:13,color:"var(--color-text-secondary)",marginBottom:"2rem"}}>Plataforma de Capacitación Docente</div>
       <div style={{background:"var(--color-background-primary)",border:"0.5px solid var(--color-border-tertiary)",borderRadius:14,padding:"2rem",width:"100%",maxWidth:380}}>
-        <div style={{fontSize:14,fontWeight:500,marginBottom:"0.5rem"}}>Iniciar sesión con Google</div>
-        <div style={{fontSize:12,color:"var(--color-text-secondary)",marginBottom:"1.25rem"}}>Selecciona tu cuenta de demostración:</div>
-        {Object.entries(ROLES).map(([key,r])=>(
-          <button key={key} onClick={()=>setS(key)} style={{width:"100%",display:"flex",alignItems:"center",gap:12,padding:"0.65rem 1rem",background:s===key?r.bg:"var(--color-background-secondary)",border:s===key?`1.5px solid ${r.color}`:"0.5px solid var(--color-border-tertiary)",borderRadius:8,cursor:"pointer",marginBottom:8,textAlign:"left"}}>
-            <Avatar name={r.email.split("@")[0]} color={r.color} size={32}/>
-            <div>
-              <div style={{fontSize:13,fontWeight:500,color:s===key?r.color:"var(--color-text-primary)"}}>{r.label}</div>
-              <div style={{fontSize:11,color:"var(--color-text-secondary)"}}>{r.email}</div>
-            </div>
-          </button>
-        ))}
-        <button onClick={()=>s&&onLogin(s)} style={{width:"100%",marginTop:8,padding:"0.6rem",background:s?"#7F77DD":"var(--color-background-secondary)",color:s?"#fff":"var(--color-text-secondary)",border:"none",borderRadius:8,fontSize:14,fontWeight:500,cursor:s?"pointer":"default"}}>
-          {s?`Entrar como ${ROLES[s].label}`:"Selecciona un rol"}
-        </button>
+        <div style={{fontSize:15,fontWeight:600,marginBottom:"0.25rem"}}>Iniciar sesión</div>
+        <div style={{fontSize:12,color:"var(--color-text-secondary)",marginBottom:"1.25rem"}}>Ingresa con tu email y clave de acceso.</div>
+        <label style={lgLbl}>Email</label>
+        <input type="email" value={email} onChange={e=>{setEmail(e.target.value);setErr("");}} onKeyDown={e=>e.key==="Enter"&&entrar()} placeholder="tu@instituto.com" style={lgInp}/>
+        <label style={lgLbl}>Clave de acceso</label>
+        <input type="password" value={clave} onChange={e=>{setClave(e.target.value);setErr("");}} onKeyDown={e=>e.key==="Enter"&&entrar()} placeholder="••••••••" style={lgInp}/>
+        {err&&<div style={{fontSize:12,color:"#A32D2D",background:"#FEE2E2",borderRadius:6,padding:"0.5rem 0.75rem",marginBottom:10}}>{err}</div>}
+        <button onClick={entrar} disabled={!email||!clave} style={{width:"100%",marginTop:4,padding:"0.6rem",background:(email&&clave)?"#7F77DD":"var(--color-background-secondary)",color:(email&&clave)?"#fff":"var(--color-text-secondary)",border:"none",borderRadius:8,fontSize:14,fontWeight:500,cursor:(email&&clave)?"pointer":"default"}}>Entrar</button>
+        <div style={{marginTop:16,padding:"0.75rem",background:"var(--color-background-secondary)",borderRadius:8,fontSize:11,color:"var(--color-text-secondary)",lineHeight:1.7}}>
+          <b>Acceso de demostración (superadmin):</b><br/>
+          Email: <code>superadmin@instituto.com</code><br/>
+          Clave: <code>educore2026</code><br/>
+          Desde ahí puedes crear usuarios y generar sus claves.
+        </div>
       </div>
     </div>
   );
 }
 
 export default function App(){
-  const [role,setRole]=useState(null);
+  const [users,setUsers]=useState(cargarUsuarios);
+  useEffect(()=>{guardarUsuarios(users);},[users]);
+  const [user,setUser]=useState(null);
   const [section,setSection]=useState("dashboard");
-  if(!role) return <LoginScreen onLogin={r=>{setRole(r);setSection("dashboard");}}/>;
+  if(!user) return <LoginScreen users={users} onLogin={u=>{setUser(u);setSection("dashboard");}}/>;
+  const role=user.rol;
   const menus={
     superadmin:[{id:"dashboard",icon:"⊞",label:"Dashboard"},{id:"usuarios",icon:"👥",label:"Usuarios"},{id:"cursos",icon:"📚",label:"Cursos"},{id:"configuracion",icon:"⚙️",label:"Config"}],
     admin:[{id:"dashboard",icon:"⊞",label:"Dashboard"},{id:"cursos",icon:"📚",label:"Cursos"},{id:"inscripciones",icon:"📋",label:"Inscripciones"},{id:"reportes",icon:"📊",label:"Reportes"}],
@@ -2013,7 +2149,7 @@ export default function App(){
       if(role==="profesor")   return <DashboardProfesor/>;
       return <DashboardAlumno/>;
     }
-    if(section==="usuarios"||section==="alumnos") return <UsuariosPage/>;
+    if(section==="usuarios"||section==="alumnos") return <UsuariosPage users={users} setUsers={setUsers} role={role}/>;
     if(section==="cursos"||section==="mis-cursos") return <CursosPage role={role}/>;
     return <GenericPage title={section}/>;
   };
@@ -2034,13 +2170,13 @@ export default function App(){
         </nav>
         <div style={{padding:"0.75rem 1rem",borderTop:"0.5px solid var(--color-border-tertiary)"}}>
           <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}>
-            <Avatar name={r.email.split("@")[0]} color={r.color} size={28}/>
+            <Avatar name={user.nombre} color={r.color} size={28}/>
             <div>
-              <div style={{fontSize:12,fontWeight:500}}>{r.label}</div>
-              <div style={{fontSize:10,color:"var(--color-text-secondary)"}}>{r.email}</div>
+              <div style={{fontSize:12,fontWeight:500}}>{user.nombre}</div>
+              <div style={{fontSize:10,color:"var(--color-text-secondary)"}}>{user.email}</div>
             </div>
           </div>
-          <button onClick={()=>setRole(null)} style={{width:"100%",padding:"0.3rem",fontSize:12,border:"0.5px solid var(--color-border-secondary)",borderRadius:6,background:"transparent",cursor:"pointer",color:"var(--color-text-secondary)"}}>Cerrar sesión</button>
+          <button onClick={()=>setUser(null)} style={{width:"100%",padding:"0.3rem",fontSize:12,border:"0.5px solid var(--color-border-secondary)",borderRadius:6,background:"transparent",cursor:"pointer",color:"var(--color-text-secondary)"}}>Cerrar sesión</button>
         </div>
       </div>
       <main style={{flex:1,padding:"1.5rem",overflowY:"auto"}}>{renderContent()}</main>
