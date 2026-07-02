@@ -726,6 +726,111 @@ const CERTIFICADOS_DATA = {
   4: { titulo:"Neuroeducación", horas:56, nivel:"Especialización", competencias:["Neuroplasticidad aplicada","Gestión emocional en aula","Diseño neuroeducativo"] },
   9: { titulo:"El Maestro como Faro — Neurodocente OIBED-Mounier 2026", horas:64, nivel:"Certificación Institucional", competencias:["Liderazgo humanista","Comunicación asertiva neurodivergencia","Alianza familia-escuela"] },
 };
+// Certificados de los cursos restantes
+CERTIFICADOS_DATA[5] = { titulo:"Neurodiversidad en el Aula", horas:40, nivel:"Especialización", competencias:["Comprensión de la neurodiversidad","Estrategias de aula inclusiva","Regulación y clima seguro"] };
+CERTIFICADOS_DATA[6] = { titulo:"Tutor Sombra: Orientación y Apoyo", horas:60, nivel:"Certificación Institucional", competencias:["Rol y ética del tutor sombra","Apoyo conductual positivo","Autonomía progresiva"] };
+CERTIFICADOS_DATA[7] = { titulo:"Inclusión Escolar y CAA", horas:56, nivel:"Especialización", competencias:["Comunicación aumentativa (CAA)","Diseño universal (DUA)","Apoyos y adecuaciones de acceso"] };
+CERTIFICADOS_DATA[8] = { titulo:"Regulación Sensorial y Mindfulness", horas:48, nivel:"Especialización", competencias:["Integración sensorial aplicada","Mindfulness infantil","Alerta calmada en el aula"] };
+
+// Evaluaciones de los cursos que faltaban (para poder aprobar y certificar)
+QUIZZES[2] = [
+  { pregunta:"El Marco de la Buena Enseñanza se organiza en:", opciones:["2 dominios","4 dominios","10 dominios","Sin dominios"], correcta:1, exp:"El MBE se estructura en 4 dominios que abarcan el ciclo completo de la enseñanza." },
+  { pregunta:"Una rúbrica analítica se caracteriza por:", opciones:["Dar una nota global","Tener criterios con descriptores por nivel","No usar criterios","Ser puramente subjetiva"], correcta:1, exp:"La rúbrica analítica desglosa criterios y describe niveles de logro para cada uno." },
+  { pregunta:"La evaluación formativa busca principalmente:", opciones:["Calificar al final","Retroalimentar durante el proceso","Comparar estudiantes","Sancionar el error"], correcta:1, exp:"Su propósito es informar y mejorar el aprendizaje mientras ocurre." },
+];
+QUIZZES[3] = [
+  { pregunta:"El liderazgo pedagógico se centra en:", opciones:["El control administrativo","La mejora de los aprendizajes","La jerarquía","La gestión de horarios"], correcta:1, exp:"Pone el foco en el aprendizaje de los estudiantes como norte de la gestión." },
+  { pregunta:"La gestión del cambio requiere sobre todo:", opciones:["Imponer decisiones","Construir con el equipo y comunicar","Ignorar la resistencia","Actuar sin planificar"], correcta:1, exp:"El cambio se sostiene cuando se construye colaborativamente y se comunica con claridad." },
+  { pregunta:"Un líder educativo eficaz:", opciones:["Decide siempre solo","Distribuye liderazgo y confía en el equipo","Centraliza todo","Evita delegar"], correcta:1, exp:"El liderazgo distribuido potencia al equipo y sostiene la mejora en el tiempo." },
+];
+QUIZZES[5] = [
+  { pregunta:"¿Qué propone el modelo de la neurodiversidad?", opciones:["Corregir las diferencias","Entender la variación neurológica como parte natural de la diversidad humana","Diagnosticar a todos los estudiantes","Eliminar los apoyos"], correcta:1, exp:"La neurodiversidad pasa del modelo del déficit al de la diversidad: las diferencias son variación, no carencia." },
+  { pregunta:"Ante una crisis conductual, el docente debe primero:", opciones:["Sancionar de inmediato","Razonar largamente con el estudiante","Regular: acompañar con calma (co-regulación)","Ignorar la situación"], correcta:2, exp:"Primero se regula y después se razona: en crisis, el cerebro racional está temporalmente fuera de línea." },
+  { pregunta:"El diseño universal para el aprendizaje (DUA) propone:", opciones:["Un único método para todos","Múltiples vías de acceso, participación y expresión","Bajar el nivel de exigencia","Separar a los estudiantes por perfil"], correcta:1, exp:"El DUA anticipa la diversidad ofreciendo varias formas de representar, implicar y expresar." },
+];
+QUIZZES[6] = [
+  { pregunta:"El rol del tutor sombra es, ante todo:", opciones:["Reemplazar al estudiante","Potenciar su autonomía sin sustituirlo","Hacer las tareas por él","Aislarlo del grupo"], correcta:1, exp:"El tutor sombra apoya para que el estudiante logre por sí mismo, no en su lugar." },
+  { pregunta:"El desvanecimiento progresivo (fading) busca:", opciones:["Aumentar la dependencia","Retirar el apoyo de forma gradual hacia la autonomía","Eliminar el apoyo de golpe","Mantener el apoyo para siempre"], correcta:1, exp:"El apoyo se reduce paso a paso a medida que el estudiante gana independencia." },
+  { pregunta:"La observación sistemática sirve para:", opciones:["Juzgar al estudiante","Registrar y comprender la conducta para decidir apoyos","Sancionar","Comparar estudiantes"], correcta:1, exp:"Observar con foco permite comprender la función de la conducta y ajustar el apoyo." },
+];
+QUIZZES[7] = [
+  { pregunta:"La CAA (comunicación aumentativa y alternativa) sirve para:", opciones:["Sustituir siempre el habla","Apoyar o complementar la comunicación","Enseñar a leer","Calificar"], correcta:1, exp:"La CAA complementa o sustituye el habla para garantizar el derecho a comunicarse." },
+  { pregunta:"El diseño universal (DUA) parte de:", opciones:["El estudiante promedio","La diversidad desde el inicio del diseño","Adaptar solo después","Un único formato"], correcta:1, exp:"El DUA diseña desde la diversidad en lugar de adaptar a posteriori." },
+  { pregunta:"Una adecuación de acceso busca:", opciones:["Bajar los objetivos de aprendizaje","Eliminar barreras para acceder al mismo aprendizaje","Separar al estudiante","Simplificar siempre el contenido"], correcta:1, exp:"Las adecuaciones de acceso quitan barreras sin modificar los objetivos de aprendizaje." },
+];
+
+// ── EMISIÓN DE CERTIFICADOS (finalización del curso) ───────────────────────
+function cargarCompletions(){ try{const r=localStorage.getItem("educore_completions"); if(r) return JSON.parse(r);}catch(e){} return {}; }
+function guardarCompletions(o){ try{localStorage.setItem("educore_completions",JSON.stringify(o));}catch(e){} }
+function getCompletion(email,cursoId){ const o=cargarCompletions(); return (o[email||"anon"]||{})[cursoId]||null; }
+function marcarCompletion(email,cursoId,score,total){
+  const o=cargarCompletions(); email=email||"anon"; o[email]=o[email]||{};
+  if(!o[email][cursoId]){
+    const codigo="EDU-"+new Date().getFullYear()+"-"+String(cursoId).padStart(3,"0")+"-"+Math.random().toString(36).substr(2,8).toUpperCase();
+    o[email][cursoId]={fecha:new Date().toISOString().slice(0,10),codigo,score,total};
+    guardarCompletions(o);
+  }
+  return o[email][cursoId];
+}
+function fechaLarga(iso){
+  const M=["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
+  const d=iso?new Date(iso+"T00:00:00"):new Date();
+  return d.getDate()+" de "+M[d.getMonth()]+" de "+d.getFullYear();
+}
+function descargarCertificado({nombre,curso,d,fecha,codigo}){
+  const color=curso.color||"#2f6f8f";
+  const comps=d.competencias.map(c=>`<span class="chip">✓ ${c}</span>`).join("");
+  const html=`<!DOCTYPE html><html lang="es"><head><meta charset="utf-8"><title>Certificado — ${d.titulo}</title>
+  <style>
+  @page{size:A4 landscape;margin:0;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:Georgia,'Times New Roman',serif;color:#1f2430;}
+  .page{width:297mm;height:210mm;padding:12mm;position:relative;}
+  .frame{width:100%;height:100%;border:3px solid ${color};border-radius:6px;padding:10mm;position:relative;
+    background:linear-gradient(135deg,${color}0a,${color}14);}
+  .frame:before{content:"";position:absolute;inset:5mm;border:1px solid ${color}66;border-radius:3px;pointer-events:none;}
+  .inner{position:relative;height:100%;display:flex;flex-direction:column;align-items:center;text-align:center;}
+  .brand{font-family:Arial,sans-serif;font-size:11px;letter-spacing:3px;color:${color};font-weight:bold;margin-top:2mm;}
+  .medal{font-size:46px;margin:3mm 0 1mm;}
+  .kicker{font-family:Arial,sans-serif;letter-spacing:6px;font-size:13px;color:#5b6472;margin-bottom:2mm;}
+  h1{font-size:30px;color:${color};margin:1mm 0 4mm;}
+  .lead{font-size:14px;color:#5b6472;}
+  .name{font-size:34px;font-weight:bold;margin:3mm 0;border-bottom:1px solid ${color}55;padding:0 12mm 3mm;display:inline-block;}
+  .course{font-size:20px;font-weight:bold;color:${color};margin:2mm 0 4mm;max-width:220mm;}
+  .meta{font-family:Arial,sans-serif;display:flex;gap:14mm;justify-content:center;margin:2mm 0 4mm;font-size:12px;color:#5b6472;}
+  .meta b{display:block;font-size:15px;color:#1f2430;margin-top:1mm;}
+  .chips{display:flex;flex-wrap:wrap;gap:6px 10px;justify-content:center;max-width:230mm;margin-bottom:auto;}
+  .chip{font-family:Arial,sans-serif;font-size:11px;background:#fff;border:1px solid ${color}44;color:#1f2430;border-radius:20px;padding:3px 12px;}
+  .foot{width:100%;display:flex;justify-content:space-between;align-items:flex-end;font-family:Arial,sans-serif;margin-top:6mm;}
+  .sign{width:70mm;text-align:center;font-size:11px;color:#5b6472;}
+  .sign .line{border-top:1px solid #1f2430;margin-bottom:2px;}
+  .code{font-family:Arial,sans-serif;font-size:10px;color:#8b93a1;position:absolute;bottom:0;left:50%;transform:translateX(-50%);}
+  </style></head>
+  <body><div class="page"><div class="frame"><div class="inner">
+    <div class="brand">OIBED · COLEGIO MOUNIER · GRUPO GRILLO</div>
+    <div class="medal">🏅</div>
+    <div class="kicker">CERTIFICADO DE APROBACIÓN</div>
+    <div class="lead">La plataforma EduCore certifica que</div>
+    <div class="name">${nombre}</div>
+    <div class="lead">ha aprobado satisfactoriamente el curso</div>
+    <div class="course">${d.titulo}</div>
+    <div class="meta">
+      <div>Duración<b>${d.horas} horas</b></div>
+      <div>Nivel<b>${d.nivel}</b></div>
+      <div>Fecha<b>${fechaLarga(fecha)}</b></div>
+    </div>
+    <div class="chips">${comps}</div>
+    <div class="foot">
+      <div class="sign"><div class="line"></div>Dirección Académica · EduCore</div>
+      <div class="sign"><div class="line"></div>OIBED · Colegio Mounier</div>
+    </div>
+    <div class="code">Código de verificación: ${codigo}</div>
+  </div></div></div></body></html>`;
+  const w=window.open("","_blank");
+  if(!w){alert("Permite las ventanas emergentes para descargar el certificado.");return;}
+  w.document.write(html); w.document.close();
+  setTimeout(()=>{w.focus();w.print();},400);
+}
 
 // ── DATOS AUXILIARES ───────────────────────────────────────────────────────
 const USERS = [
@@ -1815,13 +1920,15 @@ function VisorVideo({video,cursoId,isEditor,onClose}){
 }
 
 // ── QUIZ ───────────────────────────────────────────────────────────────────
-function QuizCurso({curso,onClose}){
+function QuizCurso({curso,user,onClose,onCertificado}){
   const qs=QUIZZES[curso.id]||[];
   const [idx,setIdx]=useState(0);
   const [sel,setSel]=useState(null);
   const [confirmado,setConfirmado]=useState(false);
   const [score,setScore]=useState(0);
   const [fin,setFin]=useState(false);
+  const aprobado=fin&&qs.length>0&&score>=qs.length*0.7;
+  useEffect(()=>{ if(aprobado) marcarCompletion(user?.email,curso.id,score,qs.length); },[aprobado]);
   if(!qs.length) return(
     <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.6)",zIndex:1000,display:"flex",alignItems:"center",justifyContent:"center",padding:"1rem"}}>
       <div style={{background:"var(--color-background-primary)",borderRadius:14,padding:"2rem",maxWidth:400,textAlign:"center"}}>
@@ -1852,8 +1959,9 @@ function QuizCurso({curso,onClose}){
               <div style={{fontSize:48,marginBottom:12}}>{score===qs.length?"🏆":score>=qs.length*0.7?"🎉":"📚"}</div>
               <div style={{fontSize:22,fontWeight:600,marginBottom:4}}>{score}/{qs.length} correctas</div>
               <div style={{fontSize:14,color:"var(--color-text-secondary)",marginBottom:20}}>{score===qs.length?"¡Perfecto! Dominas este contenido.":score>=qs.length*0.7?"¡Muy bien! Puedes solicitar tu certificado.":"Repasa el material y vuelve a intentarlo."}</div>
-              {score>=qs.length*0.7&&<div style={{background:"#E1F5EE",borderRadius:8,padding:"0.75rem",marginBottom:16,fontSize:13,color:"#0F6E56"}}>✅ Puntaje suficiente para solicitar certificado</div>}
-              <div style={{display:"flex",gap:8,justifyContent:"center"}}>
+              {aprobado&&<div style={{background:"#E1F5EE",borderRadius:8,padding:"0.75rem",marginBottom:16,fontSize:13,color:"#0F6E56"}}>✅ ¡Curso aprobado! Tu certificado ya está disponible.</div>}
+              <div style={{display:"flex",gap:8,justifyContent:"center",flexWrap:"wrap"}}>
+                {aprobado&&onCertificado&&<button onClick={onCertificado} style={{padding:"0.5rem 1.2rem",background:"#BA7517",color:"#fff",border:"none",borderRadius:6,cursor:"pointer",fontSize:13,fontWeight:500}}>🏅 Ver mi certificado</button>}
                 <button onClick={()=>{setIdx(0);setSel(null);setConfirmado(false);setScore(0);setFin(false);}} style={{padding:"0.5rem 1.2rem",background:"#378ADD",color:"#fff",border:"none",borderRadius:6,cursor:"pointer",fontSize:13}}>Reintentar</button>
                 <button onClick={onClose} style={{padding:"0.5rem 1.2rem",background:"var(--color-background-secondary)",border:"0.5px solid var(--color-border-secondary)",borderRadius:6,cursor:"pointer",fontSize:13,color:"var(--color-text-secondary)"}}>Cerrar</button>
               </div>
@@ -1888,45 +1996,58 @@ function QuizCurso({curso,onClose}){
 }
 
 // ── CERTIFICADO ────────────────────────────────────────────────────────────
-function CertificadoVisor({curso,onClose}){
+function CertificadoVisor({curso,user,role,onClose,onIrQuiz}){
   const d=CERTIFICADOS_DATA[curso.id];
-  if(!d) return(
+  const esEditor=role==="profesor"||role==="admin"||role==="superadmin";
+  const comp=getCompletion(user?.email,curso.id);
+  const nombre=user?.nombre||"Estudiante";
+  // Datos del certificado: reales si aprobó; vista previa para el staff
+  const emitido = comp || (esEditor ? {fecha:new Date().toISOString().slice(0,10), codigo:"VISTA-PREVIA", preview:true} : null);
+
+  if(!d || !emitido) return(
     <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.6)",zIndex:1000,display:"flex",alignItems:"center",justifyContent:"center",padding:"1rem"}}>
-      <div style={{background:"var(--color-background-primary)",borderRadius:14,padding:"2rem",maxWidth:400,textAlign:"center"}}>
-        <div style={{fontSize:36,marginBottom:12}}>🔒</div>
-        <div style={{fontWeight:500,marginBottom:8}}>Completa el quiz primero</div>
-        <div style={{fontSize:13,color:"var(--color-text-secondary)",marginBottom:16}}>Necesitas aprobar la evaluación del curso para generar tu certificado.</div>
-        <button onClick={onClose} style={{padding:"0.5rem 1.5rem",background:"#378ADD",color:"#fff",border:"none",borderRadius:6,cursor:"pointer"}}>Cerrar</button>
+      <div style={{background:"var(--color-background-primary)",borderRadius:14,padding:"2rem",maxWidth:420,textAlign:"center"}}>
+        <div style={{fontSize:40,marginBottom:12}}>🔒</div>
+        <div style={{fontWeight:600,fontSize:16,marginBottom:8}}>Aún no has aprobado el curso</div>
+        <div style={{fontSize:13,color:"var(--color-text-secondary)",marginBottom:18,lineHeight:1.5}}>Para obtener tu certificado de aprobación necesitas aprobar la evaluación del curso (70% o más de respuestas correctas).</div>
+        <div style={{display:"flex",gap:8,justifyContent:"center"}}>
+          {onIrQuiz&&<button onClick={onIrQuiz} style={{padding:"0.55rem 1.4rem",background:curso.color,color:"#fff",border:"none",borderRadius:6,cursor:"pointer",fontSize:13,fontWeight:500}}>📝 Ir a la evaluación</button>}
+          <button onClick={onClose} style={{padding:"0.55rem 1.4rem",background:"var(--color-background-secondary)",border:"0.5px solid var(--color-border-secondary)",borderRadius:6,cursor:"pointer",fontSize:13,color:"var(--color-text-secondary)"}}>Cerrar</button>
+        </div>
       </div>
     </div>
   );
+
+  const fecha=emitido.fecha, codigo=emitido.codigo;
   return(
     <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.6)",zIndex:1000,display:"flex",alignItems:"center",justifyContent:"center",padding:"1rem"}}>
-      <div style={{background:"var(--color-background-primary)",borderRadius:14,width:"100%",maxWidth:580,overflow:"hidden"}}>
+      <div style={{background:"var(--color-background-primary)",borderRadius:14,width:"100%",maxWidth:600,maxHeight:"90vh",overflowY:"auto"}}>
         <div style={{padding:"0.75rem 1.25rem",borderBottom:"0.5px solid var(--color-border-tertiary)",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-          <div style={{fontWeight:500,fontSize:14}}>🏅 Certificado de finalización</div>
+          <div style={{fontWeight:500,fontSize:14}}>🏅 Certificado de aprobación {emitido.preview&&<span style={{fontSize:11,color:"var(--color-text-secondary)"}}>· vista previa</span>}</div>
           <button onClick={onClose} style={{background:"var(--color-background-secondary)",border:"none",borderRadius:6,width:30,height:30,cursor:"pointer",fontSize:15}}>✕</button>
         </div>
         <div style={{padding:"1.5rem"}}>
-          <div style={{border:`2px solid ${curso.color}`,borderRadius:12,padding:"2rem",textAlign:"center",background:`linear-gradient(135deg, ${curso.color}08, ${curso.color}18)`}}>
-            <div style={{fontSize:11,fontWeight:500,color:curso.color,letterSpacing:2,marginBottom:8}}>CERTIFICADO DE FINALIZACIÓN</div>
-            <div style={{fontSize:11,color:"var(--color-text-secondary)",marginBottom:16}}>Instituto de Capacitación Docente · EduCore</div>
-            <div style={{fontSize:13,color:"var(--color-text-secondary)",marginBottom:4}}>Se certifica que</div>
-            <div style={{fontSize:22,fontWeight:700,color:"var(--color-text-primary)",marginBottom:4}}>María Soto González</div>
-            <div style={{fontSize:13,color:"var(--color-text-secondary)",marginBottom:16}}>ha completado satisfactoriamente el curso</div>
-            <div style={{fontSize:17,fontWeight:600,color:curso.color,marginBottom:16,lineHeight:1.3}}>{d.titulo}</div>
-            <div style={{display:"flex",justifyContent:"center",gap:20,marginBottom:16}}>
-              <div style={{textAlign:"center"}}><div style={{fontSize:11,color:"var(--color-text-secondary)"}}>Duración</div><div style={{fontWeight:600,fontSize:14}}>{d.horas} horas</div></div>
-              <div style={{textAlign:"center"}}><div style={{fontSize:11,color:"var(--color-text-secondary)"}}>Nivel</div><div style={{fontWeight:600,fontSize:14}}>{d.nivel}</div></div>
-              <div style={{textAlign:"center"}}><div style={{fontSize:11,color:"var(--color-text-secondary)"}}>Fecha</div><div style={{fontWeight:600,fontSize:14}}>Junio 2024</div></div>
+          <div style={{border:`3px solid ${curso.color}`,borderRadius:12,padding:"1.75rem 1.5rem",textAlign:"center",background:`linear-gradient(135deg, ${curso.color}0a, ${curso.color}1a)`,position:"relative"}}>
+            <div style={{fontSize:10,fontWeight:700,color:curso.color,letterSpacing:3}}>OIBED · COLEGIO MOUNIER · GRUPO GRILLO</div>
+            <div style={{fontSize:40,margin:"8px 0 2px"}}>🏅</div>
+            <div style={{fontSize:11,fontWeight:500,color:"var(--color-text-secondary)",letterSpacing:4,marginBottom:10}}>CERTIFICADO DE APROBACIÓN</div>
+            <div style={{fontSize:12,color:"var(--color-text-secondary)"}}>La plataforma EduCore certifica que</div>
+            <div style={{fontSize:24,fontWeight:700,color:"var(--color-text-primary)",margin:"6px 0",borderBottom:`1px solid ${curso.color}55`,display:"inline-block",padding:"0 1.5rem 6px"}}>{nombre}</div>
+            <div style={{fontSize:12,color:"var(--color-text-secondary)",marginTop:6}}>ha aprobado satisfactoriamente el curso</div>
+            <div style={{fontSize:18,fontWeight:600,color:curso.color,margin:"6px 0 16px",lineHeight:1.3}}>{d.titulo}</div>
+            <div style={{display:"flex",justifyContent:"center",gap:24,marginBottom:16}}>
+              <div><div style={{fontSize:11,color:"var(--color-text-secondary)"}}>Duración</div><div style={{fontWeight:600,fontSize:14}}>{d.horas} horas</div></div>
+              <div><div style={{fontSize:11,color:"var(--color-text-secondary)"}}>Nivel</div><div style={{fontWeight:600,fontSize:14}}>{d.nivel}</div></div>
+              <div><div style={{fontSize:11,color:"var(--color-text-secondary)"}}>Fecha</div><div style={{fontWeight:600,fontSize:14}}>{fechaLarga(fecha)}</div></div>
             </div>
-            <div style={{background:"var(--color-background-primary)",borderRadius:8,padding:"0.75rem",marginBottom:16,textAlign:"left"}}>
+            <div style={{background:"var(--color-background-primary)",borderRadius:8,padding:"0.75rem",marginBottom:14,textAlign:"left"}}>
               <div style={{fontSize:11,fontWeight:500,color:"var(--color-text-secondary)",marginBottom:6}}>COMPETENCIAS CERTIFICADAS</div>
               {d.competencias.map((c,i)=><div key={i} style={{fontSize:12,padding:"2px 0",display:"flex",gap:6}}><span style={{color:curso.color}}>✓</span>{c}</div>)}
             </div>
-            <div style={{fontSize:10,color:"var(--color-text-secondary)",marginBottom:16}}>Código: EDU-2024-{curso.id.toString().padStart(3,"0")}-{Math.random().toString(36).substr(2,8).toUpperCase()}</div>
-            <button style={{padding:"0.55rem 2rem",background:curso.color,color:"#fff",border:"none",borderRadius:6,cursor:"pointer",fontSize:13,fontWeight:500}}>⬇ Descargar certificado PDF</button>
+            <div style={{fontSize:10,color:"var(--color-text-secondary)"}}>Código de verificación: {codigo}</div>
           </div>
+          <button onClick={()=>descargarCertificado({nombre,curso,d,fecha,codigo})} style={{width:"100%",marginTop:14,padding:"0.65rem",background:curso.color,color:"#fff",border:"none",borderRadius:8,cursor:"pointer",fontSize:14,fontWeight:500}}>⬇ Descargar / Imprimir certificado</button>
+          {emitido.preview&&<div style={{marginTop:8,fontSize:11,color:"var(--color-text-secondary)",textAlign:"center"}}>Vista previa para el equipo docente. El alumno lo obtiene al aprobar la evaluación.</div>}
         </div>
       </div>
     </div>
@@ -1934,7 +2055,7 @@ function CertificadoVisor({curso,onClose}){
 }
 
 // ── RECURSOS CURSO ─────────────────────────────────────────────────────────
-function RecursosCurso({curso,role,onBack}){
+function RecursosCurso({curso,role,user,onBack}){
   const [tab,setTab]=useState("videos");
   const [visorPDF,setVisorPDF]=useState(null);
   const [visorVideo,setVisorVideo]=useState(null);
@@ -1949,8 +2070,8 @@ function RecursosCurso({curso,role,onBack}){
     <div>
       {visorPDF&&<VisorPDF pdf={visorPDF} cursoId={curso.id} isEditor={isEditor} onClose={()=>setVisorPDF(null)}/>}
       {visorVideo&&<VisorVideo video={visorVideo} cursoId={curso.id} isEditor={isEditor} onClose={()=>setVisorVideo(null)}/>}
-      {quizAbierto&&<QuizCurso curso={curso} onClose={()=>setQuizAbierto(false)}/>}
-      {certAbierto&&<CertificadoVisor curso={curso} onClose={()=>setCertAbierto(false)}/>}
+      {quizAbierto&&<QuizCurso curso={curso} user={user} onClose={()=>setQuizAbierto(false)} onCertificado={()=>{setQuizAbierto(false);setCertAbierto(true);}}/>}
+      {certAbierto&&<CertificadoVisor curso={curso} user={user} role={role} onClose={()=>setCertAbierto(false)} onIrQuiz={()=>{setCertAbierto(false);setQuizAbierto(true);}}/>}
       {docsAbierto&&<GeneradorPDFsCurso curso={curso} onClose={()=>setDocsAbierto(false)}/>}
       <button onClick={onBack} style={{fontSize:12,color:"var(--color-text-secondary)",background:"transparent",border:"none",cursor:"pointer",marginBottom:12,padding:0}}>← Volver a cursos</button>
       <div style={{background:"var(--color-background-primary)",border:"0.5px solid var(--color-border-tertiary)",borderRadius:12,padding:"1rem",marginBottom:16}}>
@@ -2028,11 +2149,11 @@ function RecursosCurso({curso,role,onBack}){
 }
 
 // ── CURSOS PAGE ────────────────────────────────────────────────────────────
-function CursosPage({role}){
+function CursosPage({role,user}){
   const [detalle,setDetalle]=useState(null);
   const [busqueda,setBusqueda]=useState("");
   const vis=CURSOS.filter(c=>c.nombre.toLowerCase().includes(busqueda.toLowerCase())||c.categoria.toLowerCase().includes(busqueda.toLowerCase()));
-  if(detalle) return <RecursosCurso curso={detalle} role={role} onBack={()=>setDetalle(null)}/>;
+  if(detalle) return <RecursosCurso curso={detalle} role={role} user={user} onBack={()=>setDetalle(null)}/>;
   return(
     <div>
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"1rem"}}>
@@ -2268,7 +2389,7 @@ export default function App(){
       return <DashboardAlumno/>;
     }
     if(section==="usuarios"||section==="alumnos") return <UsuariosPage role={role}/>;
-    if(section==="cursos"||section==="mis-cursos") return <CursosPage role={role}/>;
+    if(section==="cursos"||section==="mis-cursos") return <CursosPage role={role} user={user}/>;
     return <GenericPage title={section}/>;
   };
   const r=ROLES[role];
