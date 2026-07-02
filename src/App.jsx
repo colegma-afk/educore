@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { backend, getInitialUser, login, logout, listUsers, createUser, deleteUser, resetClave } from "./auth";
+import diplomaImg from "./diploma-oibed.png";
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, LineChart, Line } from "recharts";
 
 const ROLES = {
@@ -814,78 +815,21 @@ function sealOIBED(size, textoArriba){
 }
 
 function descargarCertificado({nombre,curso,d,fecha,codigo}){
-  const comps=d.competencias.join(" · ");
-  const sello=sealOIBED(120,"ORGANIZACIÓN IBEROAMERICANA DE EDUCACIÓN Y DERECHOS");
-  const selloTop=sealOIBED(110,"INSTITUTO OIBED · COLEGIO MOUNIER");
-  const marca=sealOIBED(460,"ORGANIZACIÓN IBEROAMERICANA DE EDUCACIÓN Y DERECHOS");
-  const html=`<!DOCTYPE html><html lang="es"><head><meta charset="utf-8"><title>Diploma — ${d.titulo}</title>
+  const bg=new URL(diplomaImg, window.location.href).href;
+  const html=`<!DOCTYPE html><html lang="es"><head><meta charset="utf-8"><title>Diploma — ${nombre}</title>
   <style>
-  @page{size:A4 landscape;margin:0;}
+  @page{size:297mm 166mm;margin:0;}
   *{box-sizing:border-box;margin:0;padding:0;}
-  body{font-family:'Times New Roman',Georgia,serif;color:#0f2b52;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
-  .page{width:297mm;height:210mm;padding:7mm;position:relative;background:#fbf7ea;}
-  .b1{position:absolute;inset:7mm;border:7px solid #0f2b52;}
-  .b2{position:absolute;inset:10mm;border:2px solid #b8912f;}
-  .b3{position:absolute;inset:12mm;border:1px solid #b8912f;}
-  .corner{position:absolute;width:16mm;height:16mm;border:3px solid #b8912f;}
-  .c1{top:9mm;left:9mm;border-right:0;border-bottom:0;}
-  .c2{top:9mm;right:9mm;border-left:0;border-bottom:0;}
-  .c3{bottom:9mm;left:9mm;border-right:0;border-top:0;}
-  .c4{bottom:9mm;right:9mm;border-left:0;border-top:0;}
-  .wm{position:absolute;top:52%;left:50%;transform:translate(-50%,-50%);opacity:.05;pointer-events:none;}
-  .inner{position:absolute;inset:16mm;display:flex;flex-direction:column;align-items:center;text-align:center;}
-  .seal-top{margin-top:-2mm;margin-bottom:1mm;}
-  .institute{font-size:26px;font-weight:bold;letter-spacing:1px;color:#0f2b52;}
-  .otorga{font-family:Arial,sans-serif;font-size:12px;letter-spacing:4px;color:#0f2b52;margin:2mm 0;}
-  .diploma{font-size:40px;font-weight:bold;color:#b8912f;letter-spacing:2px;text-shadow:0 1px 0 #8a6a1e;}
-  .aotorgado{font-family:Arial,sans-serif;font-size:12px;color:#5b6472;margin-top:5mm;}
-  .name{font-size:32px;font-weight:bold;color:#0f2b52;border-bottom:1.5px solid #b8912f;padding:0 20mm 2mm;margin:1mm 0 4mm;}
-  .body{font-size:14px;color:#233;line-height:1.5;max-width:190mm;}
-  .course{font-size:22px;font-weight:bold;color:#0f2b52;margin:1mm 0;}
-  .oibed-line{font-size:15px;font-weight:bold;color:#b8912f;margin-top:2mm;letter-spacing:1px;}
-  .nivel{font-family:Arial,sans-serif;font-size:12px;color:#5b6472;}
-  .comps{font-family:Arial,sans-serif;font-size:11px;color:#5b6472;margin-top:3mm;max-width:200mm;}
-  .reg{position:absolute;bottom:20mm;left:0;right:0;display:flex;justify-content:space-between;font-family:Arial,sans-serif;font-size:11px;color:#0f2b52;}
-  .reg b{color:#0f2b52;}
-  .signs{position:absolute;bottom:2mm;left:0;right:0;display:flex;justify-content:space-around;}
-  .sign{width:75mm;text-align:center;font-family:Arial,sans-serif;}
-  .sign .ln{border-top:1.5px solid #0f2b52;margin-bottom:3px;}
-  .sign .nm{font-size:13px;font-weight:bold;color:#0f2b52;}
-  .sign .rl{font-size:11px;color:#5b6472;}
-  .seal-left{position:absolute;left:2mm;top:96mm;}
+  html,body{width:297mm;height:166mm;}
+  .page{position:relative;width:297mm;height:166mm;background:#fbf7ea;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  .bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
+  .name{position:absolute;left:29%;width:47%;top:44.5%;text-align:center;font-family:'Times New Roman',Georgia,serif;font-weight:bold;color:#0f2b52;font-size:28pt;white-space:nowrap;}
   </style></head>
-  <body><div class="page">
-    <div class="wm">${marca}</div>
-    <div class="b1"></div><div class="b2"></div><div class="b3"></div>
-    <div class="corner c1"></div><div class="corner c2"></div><div class="corner c3"></div><div class="corner c4"></div>
-    <div class="inner">
-      <div class="seal-top">${selloTop}</div>
-      <div class="institute">Instituto de Capacitación · OIBED — Colegio Mounier</div>
-      <div class="otorga">OTORGA EL PRESENTE</div>
-      <div class="diploma">CERTIFICADO DE APROBACIÓN</div>
-      <div class="aotorgado">Otorgado a:</div>
-      <div class="name">${nombre}</div>
-      <div class="body">Por haber aprobado con éxito la capacitación de:</div>
-      <div class="course">${d.titulo}</div>
-      <div class="body">con una duración total de ${d.horas} horas académicas.</div>
-      <div class="oibed-line">CAPACITACIÓN PROFESIONAL OIBED</div>
-      <div class="nivel">Nivel: ${d.nivel}</div>
-      <div class="comps">Competencias certificadas: ${comps}</div>
-      <div class="seal-left">${sello}</div>
-      <div class="reg">
-        <div>NÚMERO DE REGISTRO: <b>${codigo}</b></div>
-        <div>EMITIDO EN: <b>Santiago, Chile, ${fechaDiploma(fecha)}.</b></div>
-      </div>
-      <div class="signs">
-        <div class="sign"><div class="ln"></div><div class="nm">Aníbal Garat Pizarro</div><div class="rl">Director Académico · OIBED</div></div>
-        <div class="sign"><div class="ln"></div><div class="nm">Grupo Grillo · Colegio Mounier</div><div class="rl">Coordinación Académica</div></div>
-      </div>
-    </div>
-  </div></body></html>`;
+  <body><div class="page"><img class="bg" src="${bg}" crossorigin="anonymous"/><div class="name">${nombre}</div></div></body></html>`;
   const w=window.open("","_blank");
   if(!w){alert("Permite las ventanas emergentes para descargar el certificado.");return;}
   w.document.write(html); w.document.close();
-  setTimeout(()=>{w.focus();w.print();},450);
+  setTimeout(()=>{w.focus();w.print();},900);
 }
 
 // ── DATOS AUXILIARES ───────────────────────────────────────────────────────
@@ -2083,32 +2027,12 @@ function CertificadoVisor({curso,user,role,onClose,onIrQuiz}){
           <button onClick={onClose} style={{background:"var(--color-background-secondary)",border:"none",borderRadius:6,width:30,height:30,cursor:"pointer",fontSize:15}}>✕</button>
         </div>
         <div style={{padding:"1.5rem"}}>
-          <div style={{border:"7px solid #0f2b52",borderRadius:4,padding:"1.6rem 1.5rem",textAlign:"center",background:"#fbf7ea",position:"relative",color:"#0f2b52"}}>
-            <div style={{position:"absolute",inset:6,border:"2px solid #b8912f",borderRadius:2,pointerEvents:"none"}}/>
-            <div style={{position:"relative"}}>
-              <div style={{fontSize:10,fontWeight:700,color:"#b8912f",letterSpacing:3}}>OIBED · COLEGIO MOUNIER · GRUPO GRILLO</div>
-              <div style={{fontSize:38,margin:"6px 0 2px"}}>🏅</div>
-              <div style={{fontSize:22,fontWeight:700,color:"#b8912f",letterSpacing:2,textShadow:"0 1px 0 #8a6a1e"}}>CERTIFICADO DE APROBACIÓN</div>
-              <div style={{fontSize:12,color:"#5b6472",marginTop:8}}>Otorgado a</div>
-              <div style={{fontSize:24,fontWeight:700,color:"#0f2b52",margin:"4px 0",borderBottom:"1.5px solid #b8912f",display:"inline-block",padding:"0 1.5rem 6px",fontFamily:"Georgia, serif"}}>{nombre}</div>
-              <div style={{fontSize:12,color:"#5b6472",marginTop:8}}>por haber aprobado satisfactoriamente el curso</div>
-              <div style={{fontSize:18,fontWeight:700,color:"#0f2b52",margin:"4px 0 14px",lineHeight:1.3}}>{d.titulo}</div>
-              <div style={{display:"flex",justifyContent:"center",gap:24,marginBottom:14}}>
-                <div><div style={{fontSize:11,color:"#5b6472"}}>Duración</div><div style={{fontWeight:700,fontSize:14}}>{d.horas} horas</div></div>
-                <div><div style={{fontSize:11,color:"#5b6472"}}>Nivel</div><div style={{fontWeight:700,fontSize:14}}>{d.nivel}</div></div>
-                <div><div style={{fontSize:11,color:"#5b6472"}}>Fecha</div><div style={{fontWeight:700,fontSize:14}}>{fechaLarga(fecha)}</div></div>
-              </div>
-              <div style={{background:"#ffffffaa",border:"1px solid #b8912f55",borderRadius:6,padding:"0.6rem 0.75rem",marginBottom:12,textAlign:"left"}}>
-                <div style={{fontSize:10,fontWeight:700,color:"#b8912f",marginBottom:4,letterSpacing:1}}>COMPETENCIAS CERTIFICADAS</div>
-                {d.competencias.map((c,i)=><div key={i} style={{fontSize:12,padding:"2px 0",display:"flex",gap:6,color:"#233"}}><span style={{color:"#b8912f"}}>✦</span>{c}</div>)}
-              </div>
-              <div style={{display:"flex",justifyContent:"space-between",fontSize:10,color:"#5b6472",marginBottom:2}}>
-                <span>N.º de registro: <b style={{color:"#0f2b52"}}>{codigo}</b></span>
-                <span>Santiago, Chile</span>
-              </div>
-            </div>
+          <div style={{position:"relative",lineHeight:0,borderRadius:4,overflow:"hidden",boxShadow:"0 2px 10px rgba(0,0,0,0.15)"}}>
+            <img src={diplomaImg} alt="Diploma" style={{width:"100%",display:"block"}}/>
+            <div style={{position:"absolute",left:"29%",width:"47%",top:"44.5%",textAlign:"center",fontFamily:"'Times New Roman',Georgia,serif",fontWeight:700,color:"#0f2b52",fontSize:"clamp(14px,3.2vw,26px)",lineHeight:1.1,whiteSpace:"nowrap",overflow:"hidden"}}>{nombre}</div>
           </div>
-          <button onClick={()=>descargarCertificado({nombre,curso,d,fecha,codigo})} style={{width:"100%",marginTop:14,padding:"0.65rem",background:"#0f2b52",color:"#eccb6b",border:"1px solid #b8912f",borderRadius:8,cursor:"pointer",fontSize:14,fontWeight:600}}>⬇ Descargar / Imprimir diploma</button>
+          <div style={{marginTop:10,fontSize:11,color:"var(--color-text-secondary)",textAlign:"center"}}>N.º de registro: <b style={{color:"var(--color-text-primary)"}}>{codigo}</b> · {fechaLarga(fecha)}</div>
+          <button onClick={()=>descargarCertificado({nombre,curso,d,fecha,codigo})} style={{width:"100%",marginTop:12,padding:"0.65rem",background:"#0f2b52",color:"#eccb6b",border:"1px solid #b8912f",borderRadius:8,cursor:"pointer",fontSize:14,fontWeight:600}}>⬇ Descargar / Imprimir diploma</button>
           {emitido.preview&&<div style={{marginTop:8,fontSize:11,color:"var(--color-text-secondary)",textAlign:"center"}}>Vista previa para el equipo docente. El alumno lo obtiene al aprobar la evaluación.</div>}
         </div>
       </div>
